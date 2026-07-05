@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>SIP Summer Tracker</title>
+
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js">
+  </script>
+
+
+  <style>
+
+    body {
+      font-family: Arial, sans-serif;
+
+      background:
+        linear-gradient(
+          to right,
+          #c6ffdd,
+          #fbd786,
+          #f7797d
+        );
+
+      margin: 0;
+      padding: 0;
+    }
+
+
+    nav {
+      background-color: #333;
+
+      padding: 1em;
+
+      display: flex;
+
+      justify-content: space-around;
+
+      flex-wrap: wrap;
+    }
+
+
+    nav button {
+      background: none;
+
+      border: none;
+
+      color: white;
+
+      font-size: 16px;
+
+      cursor: pointer;
+    }
+
+
+    .container {
+      padding: 2em;
+    }
+
+
+    h2 {
+      color: #333;
+    }
+
+
+    label {
+      display: block;
+
+      margin: 1em 0 0.5em;
+    }
+
+
+    input,
+    textarea {
+
+      width: 100%;
+
+      padding: 0.5em;
+
+      border: 1px solid #ccc;
+
+      border-radius: 4px;
+
+      box-sizing: border-box;
+    }
+
+
+    input[type="checkbox"] {
+      width: auto;
+    }
+
+
+    button {
+      margin-top: 1em;
+
+      padding: 0.5em 1em;
+
+      background-color: #4CAF50;
+
+      color: white;
+
+      border: none;
+
+      border-radius: 4px;
+
+      cursor: pointer;
+    }
+
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+
+    .delete-button {
+      background-color: #d9534f;
+    }
+
+
+    .delete-button:hover {
+      background-color: #c9302c;
+    }
+
+
+    .hidden {
+      display: none;
+    }
+
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+
+    table {
+      width: 100%;
+
+      border-collapse: collapse;
+
+      margin-top: 2em;
+
+      background: white;
+    }
+
+
+    th,
+    td {
+
+      border: 1px solid #ddd;
+
+      padding: 0.75em;
+
+      text-align: left;
+
+      vertical-align: top;
+
+      word-break: break-word;
+    }
+
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+
+    .applied {
+      color: green;
+
+      font-weight: bold;
+    }
+
+
+    .deadline-green {
+      background-color: #d4edda;
+    }
+
+
+    .deadline-yellow {
+      background-color: #fff3cd;
+    }
+
+
+    .deadline-orange {
+      background-color: #ffe0b2;
+    }
+
+
+    .deadline-red {
+      background-color: #f8d7da;
+    }
+
+
+    .tooltip {
+
+      position: relative;
+
+      display: inline-block;
+
+      cursor: pointer;
+
+      background: #eee;
+
+      padding: 0.3em 0.5em;
+
+      border-radius: 4px;
+    }
+
+
+    .tooltip .tooltiptext {
+
+      visibility: hidden;
+
+      width: 250px;
+
+      background-color: #333;
+
+      color: white;
+
+      text-align: left;
+
+      padding: 8px;
+
+      border-radius: 6px;
+
+      position: absolute;
+
+      z-index: 10;
+
+      top: 120%;
+
+      left: 50%;
+
+      transform: translateX(-50%);
+
+      opacity: 0;
+
+      transition: opacity 0.3s;
+    }
+
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+
+      opacity: 1;
+    }
+
+
+    table th:first-child,
+    table td:first-child {
+
+      width: 30px;
+
+      text-align: center;
+    }
+
+
+    #entryTable th:nth-child(2),
+    #entryTable td:nth-child(2) {
+
+      min-width: 150px;
+    }
+
+
+    #entryTable th:nth-child(4),
+    #entryTable td:nth-child(4) {
+
+      width: 70px;
+    }
+
+
+    .status-message {
+
+      margin-top: 15px;
+
+      font-weight: bold;
+    }
+
+
+    @media (max-width: 700px) {
+
+      .container {
+        padding: 1em;
+      }
+
+
+      nav {
+        gap: 8px;
+      }
+
+
+      nav button {
+        font-size: 14px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<nav>
+
+  <button onclick="showPage('formPage')">
+    Add Entry
+  </button>
+
+
+  <button onclick="showPage('viewPage')">
+    View Entries
+  </button>
+
+
+  <button onclick="showPage('taskPage')">
+    Tasks
+  </button>
+
+
+  <button onclick="exportToExcel()">
+    Export to Excel
+  </button>
+
+</nav>
+
+
+
+<!-- ===================================================
+     ADD ENTRY PAGE
+=================================================== -->
+
+
+<div
+  class="container"
+  id="formPage"
+>
+
+  <h2>Enter SIP Details</h2>
+
+
+  <label>
+    Company Name *
+  </label>
+
+
+  <input
+    type="text"
+    id="company"
+  >
+
+
+  <label>
+    Role *
+  </label>
+
+
+  <input
+    type="text"
+    id="role"
+  >
+
+
+  <label>
+    Rounds
+  </label>
+
+
+  <textarea
+    id="rounds"
+    placeholder="e.g. CV Shortlisting, Technical Interview, HR Interview"
+  ></textarea>
+
+
+  <label>
+    Deadline *
+  </label>
+
+
+  <input
+    type="datetime-local"
+    id="deadline"
+  >
+
+
+  <label>
+    Notes / Additional Info
+  </label>
+
+
+  <textarea
+    id="notes"
+  ></textarea>
+
+
+  <label>
+    Forms to Complete
+    (comma-separated)
+  </label>
+
+
+  <input
+    type="text"
+    id="forms"
+    placeholder="Application Form, Video Form"
+  >
+
+
+  <button
+    id="saveEntryButton"
+    onclick="saveData()"
+  >
+    Save Entry
+  </button>
+
+
+  <button
+    id="cancelEditButton"
+    class="hidden"
+    onclick="cancelEdit()"
+  >
+    Cancel Edit
+  </button>
+
+
+  <div
+    id="formStatus"
+    class="status-message"
+  ></div>
+
+</div>
+
+
+
+<!-- ===================================================
+     VIEW ENTRIES PAGE
+=================================================== -->
+
+
+<div
+  class="container hidden"
+  id="viewPage"
+>
+
+  <h2>All Entries</h2>
+
+
+  <div class="table-container">
+
+    <table id="entryTable">
+
+      <thead>
+
+        <tr>
+
+          <th>#</th>
+
+          <th>Company</th>
+
+          <th>Role</th>
+
+          <th>Rounds</th>
+
+          <th>Deadline</th>
+
+          <th>Applied</th>
+
+          <th>Notes</th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+
+<!-- ===================================================
+     TASK PAGE
+=================================================== -->
+
+
+<div
+  class="container hidden"
+  id="taskPage"
+>
+
+  <h2>Company Tasks</h2>
+
+
+  <label>
+    Company Name *
+  </label>
+
+
+  <input
+    type="text"
+    id="taskCompany"
+  >
+
+
+  <label>
+    Task *
+  </label>
+
+
+  <input
+    type="text"
+    id="taskName"
+  >
+
+
+  <label>
+    Deadline *
+  </label>
+
+
+  <input
+    type="datetime-local"
+    id="taskDeadline"
+  >
+
+
+  <button onclick="saveTask()">
+    Add Task
+  </button>
+
+
+  <div class="table-container">
+
+    <table id="taskTable">
+
+      <thead>
+
+        <tr>
+
+          <th>#</th>
+
+          <th>Company</th>
+
+          <th>Task</th>
+
+          <th>Deadline</th>
+
+          <th>Action</th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+
+let editId = null;
+
+
+
+// =====================================================
+// PAGE NAVIGATION
+// =====================================================
+
+
+function showPage(pageId) {
+
+  document
+    .getElementById("formPage")
+    .classList.add("hidden");
+
+
+  document
+    .getElementById("viewPage")
+    .classList.add("hidden");
+
+
+  document
+    .getElementById("taskPage")
+    .classList.add("hidden");
+
+
+  document
+    .getElementById(pageId)
+    .classList.remove("hidden");
+
+
+  if (pageId === "viewPage") {
+    loadData();
+  }
+
+
+  if (pageId === "taskPage") {
+    loadTasks();
+  }
+
+}
+
+
+
+// =====================================================
+// DEADLINE FORMATTER
+// =====================================================
+
+
+function formatDeadline(
+  dateStr,
+  overrideApplied = false
+) {
+
+  if (overrideApplied) {
+
+    return {
+      text: "Applied",
+      className: "applied"
+    };
+
+  }
+
+
+  if (!dateStr) {
+
+    return {
+      text: "No Deadline",
+      className: ""
+    };
+
+  }
+
+
+  const deadline = new Date(dateStr);
+
+  const now = new Date();
+
+  const diffMs = deadline - now;
+
+
+  if (isNaN(deadline.getTime())) {
+
+    return {
+      text: "Invalid",
+      className: ""
+    };
+
+  }
+
+
+  const dd =
+    String(deadline.getDate())
+      .padStart(2, "0");
+
+
+  const mm =
+    String(deadline.getMonth() + 1)
+      .padStart(2, "0");
+
+
+  const yyyy =
+    deadline.getFullYear();
+
+
+  const hh =
+    String(deadline.getHours())
+      .padStart(2, "0");
+
+
+  const mins =
+    String(deadline.getMinutes())
+      .padStart(2, "0");
+
+
+  const formatted =
+    `${dd}-${mm}-${yyyy} ${hh}:${mins}`;
+
+
+  if (diffMs <= 0) {
+
+    return {
+
+      text:
+        `${formatted} (Deadline Passed)`,
+
+      className:
+        "deadline-red"
+
+    };
+
+  }
+
+
+  const diffHrs =
+    Math.floor(
+      diffMs / (1000 * 60 * 60)
+    );
+
+
+  const diffMins =
+    Math.floor(
+      (diffMs / (1000 * 60)) % 60
+    );
+
+
+  let className = "";
+
+
+  if (diffHrs > 24) {
+
+    className =
+      "deadline-green";
+
+  } else if (diffHrs >= 6) {
+
+    className =
+      "deadline-yellow";
+
+  } else if (diffHrs >= 1) {
+
+    className =
+      "deadline-orange";
+
+  } else {
+
+    className =
+      "deadline-red";
+
+  }
+
+
+  return {
+
+    text:
+      `${formatted} (${diffHrs}h ${diffMins}m left)`,
+
+    className
+
+  };
+
+}
+
+
+
+// =====================================================
+// SAVE SIP ENTRY
+// =====================================================
+
+
+async function saveData() {
+
+  const company =
+    document
+      .getElementById("company")
+      .value
+      .trim();
+
+
+  const role =
+    document
+      .getElementById("role")
+      .value
+      .trim();
+
+
+  const rounds =
+    document
+      .getElementById("rounds")
+      .value
+      .trim();
+
+
+  const deadline =
+    document
+      .getElementById("deadline")
+      .value;
+
+
+  const notes =
+    document
+      .getElementById("notes")
+      .value
+      .trim();
+
+
+  const formsInput =
+    document
+      .getElementById("forms")
+      .value
+      .trim();
+
+
+  if (!company || !role) {
+
+    alert(
+      "Company name and Role are required!"
+    );
+
+    return;
+
+  }
+
+
+  let forms = [];
+
+
+  if (formsInput) {
+
+    const formNames =
+      formsInput
+        .split(",")
+        .map(f => f.trim())
+        .filter(f => f);
+
+
+    if (editId) {
+
+      const response =
+        await fetch("/api/sip");
+
+
+      const currentData =
+        await response.json();
+
+
+      const currentEntry =
+        currentData.find(
+          item => item.id === editId
+        );
+
+
+      forms = formNames.map(name => {
+
+        const existingForm =
+          currentEntry?.forms?.find(
+            form => form.name === name
+          );
+
+
+        return {
+
+          name,
+
+          checked:
+            existingForm
+              ? existingForm.checked
+              : false
+
+        };
+
+      });
+
+    } else {
+
+      forms = formNames.map(name => ({
+
+        name,
+
+        checked: false
+
+      }));
+
+    }
+
+  }
+
+
+  let applied = false;
+
+
+  if (editId) {
+
+    const response =
+      await fetch("/api/sip");
+
+
+    const currentData =
+      await response.json();
+
+
+    const currentEntry =
+      currentData.find(
+        item => item.id === editId
+      );
+
+
+    applied =
+      currentEntry?.applied || false;
+
+  }
+
+
+  const entry = {
+
+    company,
+
+    role,
+
+    rounds,
+
+    deadline,
+
+    notes,
+
+    forms,
+
+    applied
+
+  };
+
+
+  try {
+
+    let response;
+
+
+    if (editId) {
+
+      response = await fetch(
+
+        `/api/sip/${editId}`,
+
+        {
+
+          method: "PUT",
+
+          headers: {
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify(entry)
+
+        }
+
+      );
+
+    } else {
+
+      response = await fetch(
+
+        "/api/sip",
+
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify(entry)
+
+        }
+
+      );
+
+    }
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Could not save entry"
+      );
+
+    }
+
+
+    alert(
+      editId
+        ? "Entry updated!"
+        : "Entry saved!"
+    );
+
+
+    clearForm();
+
+    editId = null;
+
+
+    document
+      .getElementById("saveEntryButton")
+      .textContent =
+        "Save Entry";
+
+
+    document
+      .getElementById("cancelEditButton")
+      .classList.add("hidden");
+
+
+    showPage("viewPage");
+
+  } catch (error) {
+
+    alert(
+      "Error saving entry."
+    );
+
+  }
+
+}
+
+
+
+// =====================================================
+// LOAD SIP ENTRIES
+// =====================================================
+
+
+async function loadData() {
+
+  try {
+
+    const response =
+      await fetch("/api/sip");
+
+
+    const data =
+      await response.json();
+
+
+    const tbody =
+      document.querySelector(
+        "#entryTable tbody"
+      );
+
+
+    tbody.innerHTML = "";
+
+
+    data.forEach(
+      (item, index) => {
+
+
+        const row =
+          document.createElement("tr");
+
+
+        const hasForms =
+          item.forms &&
+          item.forms.length > 0;
+
+
+        const allCompleted =
+          hasForms
+
+            ? item.forms.every(
+                form => form.checked
+              )
+
+            : item.applied;
+
+
+        const deadlineInfo =
+          formatDeadline(
+            item.deadline,
+            allCompleted
+          );
+
+
+        let formsHtml = "";
+
+
+        if (hasForms) {
+
+          formsHtml = item.forms
+
+            .map(
+
+              (form, formIndex) => `
+
+                <label
+                  style="
+                    margin-right:10px;
+                    font-size:15px;
+                  "
+                >
+
+                  <input
+
+                    type="checkbox"
+
+                    onchange="
+                      toggleForm(
+                        '${item.id}',
+                        ${formIndex}
+                      )
+                    "
+
+                    ${
+                      form.checked
+                        ? "checked"
+                        : ""
+                    }
+
+                  >
+
+                  ${escapeHtml(form.name)}
+
+                </label>
+
+              `
+
+            )
+
+            .join("");
+
+        } else {
+
+          formsHtml = `
+
+            <input
+
+              type="checkbox"
+
+              onchange="
+                toggleAppliedSingle(
+                  '${item.id}'
+                )
+              "
+
+              ${
+                allCompleted
+                  ? "checked"
+                  : ""
+              }
+
+            >
+
+          `;
+
+        }
+
+
+        row.innerHTML = `
+
+          <td>
+            ${index + 1}
+          </td>
+
+
+          <td>
+            ${escapeHtml(item.company)}
+          </td>
+
+
+          <td>
+            ${escapeHtml(item.role)}
+          </td>
+
+
+          <td>
+
+            <div class="tooltip">
+
+              View
+
+              <span class="tooltiptext">
+
+                ${
+                  escapeHtml(
+                    item.rounds || ""
+                  )
+                  .replace(
+                    /\n/g,
+                    "<br>"
+                  )
+                }
+
+              </span>
+
+            </div>
+
+          </td>
+
+
+          <td
+            class="${deadlineInfo.className}"
+          >
+
+            ${deadlineInfo.text}
+
+          </td>
+
+
+          <td>
+
+            ${formsHtml}
+
+            <br>
+
+
+            <button
+              onclick="
+                editEntry('${item.id}')
+              "
+            >
+              Edit
+            </button>
+
+
+            <button
+
+              class="delete-button"
+
+              onclick="
+                deleteEntry('${item.id}')
+              "
+
+            >
+              Delete
+            </button>
+
+          </td>
+
+
+          <td>
+
+            ${
+              escapeHtml(
+                item.notes || ""
+              )
+              .replace(
+                /\n/g,
+                "<br>"
+              )
+            }
+
+          </td>
+
+        `;
+
+
+        tbody.appendChild(row);
+
+      }
+
+    );
+
+  } catch (error) {
+
+    alert(
+      "Could not load entries."
+    );
+
+  }
+
+}
+
+
+
+// =====================================================
+// TOGGLE FORM
+// =====================================================
+
+
+async function toggleForm(
+  entryId,
+  formIndex
+) {
+
+  await fetch(
+
+    `/api/sip/${entryId}/forms/${formIndex}`,
+
+    {
+      method: "PATCH"
+    }
+
+  );
+
+
+  loadData();
+
+}
+
+
+
+// =====================================================
+// TOGGLE SINGLE APPLIED
+// =====================================================
+
+
+async function toggleAppliedSingle(id) {
+
+  await fetch(
+
+    `/api/sip/${id}/applied`,
+
+    {
+      method: "PATCH"
+    }
+
+  );
+
+
+  loadData();
+
+}
+
+
+
+// =====================================================
+// EDIT ENTRY
+// =====================================================
+
+
+async function editEntry(id) {
+
+  const response =
+    await fetch("/api/sip");
+
+
+  const data =
+    await response.json();
+
+
+  const item =
+    data.find(
+      entry => entry.id === id
+    );
+
+
+  if (!item) {
+
+    alert(
+      "Entry not found."
+    );
+
+    return;
+
+  }
+
+
+  document
+    .getElementById("company")
+    .value =
+      item.company;
+
+
+  document
+    .getElementById("role")
+    .value =
+      item.role;
+
+
+  document
+    .getElementById("rounds")
+    .value =
+      item.rounds || "";
+
+
+  document
+    .getElementById("deadline")
+    .value =
+      item.deadline || "";
+
+
+  document
+    .getElementById("notes")
+    .value =
+      item.notes || "";
+
+
+  document
+    .getElementById("forms")
+    .value =
+
+      item.forms
+
+        ? item.forms
+            .map(
+              form => form.name
+            )
+            .join(", ")
+
+        : "";
+
+
+  editId = id;
+
+
+  document
+    .getElementById("saveEntryButton")
+    .textContent =
+      "Update Entry";
+
+
+  document
+    .getElementById("cancelEditButton")
+    .classList.remove("hidden");
+
+
+  showPage("formPage");
+
+}
+
+
+
+// =====================================================
+// CANCEL EDIT
+// =====================================================
+
+
+function cancelEdit() {
+
+  editId = null;
+
+
+  clearForm();
+
+
+  document
+    .getElementById("saveEntryButton")
+    .textContent =
+      "Save Entry";
+
+
+  document
+    .getElementById("cancelEditButton")
+    .classList.add("hidden");
+
+}
+
+
+
+// =====================================================
+// CLEAR FORM
+// =====================================================
+
+
+function clearForm() {
+
+  document
+    .getElementById("company")
+    .value = "";
+
+
+  document
+    .getElementById("role")
+    .value = "";
+
+
+  document
+    .getElementById("rounds")
+    .value = "";
+
+
+  document
+    .getElementById("deadline")
+    .value = "";
+
+
+  document
+    .getElementById("notes")
+    .value = "";
+
+
+  document
+    .getElementById("forms")
+    .value = "";
+
+}
+
+
+
+// =====================================================
+// DELETE ENTRY
+// =====================================================
+
+
+async function deleteEntry(id) {
+
+  const confirmed =
+    confirm(
+      "Are you sure you want to delete this entry?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  const response =
+    await fetch(
+
+      `/api/sip/${id}`,
+
+      {
+        method: "DELETE"
+      }
+
+    );
+
+
+  if (!response.ok) {
+
+    alert(
+      "Could not delete entry."
+    );
+
+    return;
+
+  }
+
+
+  loadData();
+
+}
+
+
+
+// =====================================================
+// SAVE TASK
+// =====================================================
+
+
+async function saveTask() {
+
+  const company =
+    document
+      .getElementById("taskCompany")
+      .value
+      .trim();
+
+
+  const task =
+    document
+      .getElementById("taskName")
+      .value
+      .trim();
+
+
+  const deadline =
+    document
+      .getElementById("taskDeadline")
+      .value;
+
+
+  if (
+    !company ||
+    !task ||
+    !deadline
+  ) {
+
+    alert(
+      "Please fill all fields!"
+    );
+
+    return;
+
+  }
+
+
+  const response =
+    await fetch(
+
+      "/api/tasks",
+
+      {
+
+        method: "POST",
+
+        headers: {
+
+          "Content-Type":
+            "application/json"
+
+        },
+
+        body:
+          JSON.stringify({
+
+            company,
+
+            task,
+
+            deadline
+
+          })
+
+      }
+
+    );
+
+
+  if (!response.ok) {
+
+    alert(
+      "Could not save task."
+    );
+
+    return;
+
+  }
+
+
+  document
+    .getElementById("taskCompany")
+    .value = "";
+
+
+  document
+    .getElementById("taskName")
+    .value = "";
+
+
+  document
+    .getElementById("taskDeadline")
+    .value = "";
+
+
+  loadTasks();
+
+}
+
+
+
+// =====================================================
+// LOAD TASKS
+// =====================================================
+
+
+async function loadTasks() {
+
+  try {
+
+    const response =
+      await fetch("/api/tasks");
+
+
+    const tasks =
+      await response.json();
+
+
+    const tbody =
+      document.querySelector(
+        "#taskTable tbody"
+      );
+
+
+    tbody.innerHTML = "";
+
+
+    tasks.forEach(
+      (item, index) => {
+
+
+        const deadlineInfo =
+          formatDeadline(
+            item.deadline
+          );
+
+
+        const row =
+          document.createElement("tr");
+
+
+        row.innerHTML = `
+
+          <td>
+            ${index + 1}
+          </td>
+
+
+          <td>
+            ${escapeHtml(item.company)}
+          </td>
+
+
+          <td>
+            ${escapeHtml(item.task)}
+          </td>
+
+
+          <td
+            class="${deadlineInfo.className}"
+          >
+
+            ${deadlineInfo.text}
+
+          </td>
+
+
+          <td>
+
+            <button
+
+              class="delete-button"
+
+              onclick="
+                deleteTask('${item.id}')
+              "
+
+            >
+
+              Delete
+
+            </button>
+
+          </td>
+
+        `;
+
+
+        tbody.appendChild(row);
+
+      }
+
+    );
+
+  } catch (error) {
+
+    alert(
+      "Could not load tasks."
+    );
+
+  }
+
+}
+
+
+
+// =====================================================
+// DELETE TASK
+// =====================================================
+
+
+async function deleteTask(id) {
+
+  const confirmed =
+    confirm(
+      "Delete this task?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  const response =
+    await fetch(
+
+      `/api/tasks/${id}`,
+
+      {
+        method: "DELETE"
+      }
+
+    );
+
+
+  if (!response.ok) {
+
+    alert(
+      "Could not delete task."
+    );
+
+    return;
+
+  }
+
+
+  loadTasks();
+
+}
+
+
+
+// =====================================================
+// EXCEL EXPORT
+// =====================================================
+
+
+async function exportToExcel() {
+
+  try {
+
+    const response =
+      await fetch("/api/all-data");
+
+
+    const allData =
+      await response.json();
+
+
+    const sipData =
+      allData.sipData;
+
+
+    const taskData =
+      allData.taskData;
+
+
+    const sipSheetData =
+      sipData.map(
+
+        (item, index) => ({
+
+          "S.No":
+            index + 1,
+
+          "Company":
+            item.company,
+
+          "Role":
+            item.role,
+
+          "Rounds":
+            item.rounds,
+
+          "Deadline":
+            item.deadline,
+
+          "Application Status":
+
+            item.forms &&
+            item.forms.length > 0
+
+              ? item.forms.every(
+                  form => form.checked
+                )
+                  ? "Applied"
+                  : "Pending"
+
+              : item.applied
+                  ? "Applied"
+                  : "Pending",
+
+          "Forms":
+
+            item.forms
+
+              ? item.forms
+                  .map(
+
+                    form =>
+
+                      `${form.name} (${
+                        form.checked
+                          ? "Done"
+                          : "Pending"
+                      })`
+
+                  )
+                  .join(", ")
+
+              : "",
+
+          "Notes":
+            item.notes
+
+        })
+
+      );
+
+
+    const taskSheetData =
+      taskData.map(
+
+        (item, index) => ({
+
+          "S.No":
+            index + 1,
+
+          "Company":
+            item.company,
+
+          "Task":
+            item.task,
+
+          "Deadline":
+            item.deadline
+
+        })
+
+      );
+
+
+    const workbook =
+      XLSX.utils.book_new();
+
+
+    const sipWorksheet =
+      XLSX.utils.json_to_sheet(
+        sipSheetData
+      );
+
+
+    const taskWorksheet =
+      XLSX.utils.json_to_sheet(
+        taskSheetData
+      );
+
+
+    XLSX.utils.book_append_sheet(
+
+      workbook,
+
+      sipWorksheet,
+
+      "SIP Applications"
+
+    );
+
+
+    XLSX.utils.book_append_sheet(
+
+      workbook,
+
+      taskWorksheet,
+
+      "Tasks"
+
+    );
+
+
+    XLSX.writeFile(
+
+      workbook,
+
+      "SIP_Tracker.xlsx"
+
+    );
+
+  } catch (error) {
+
+    alert(
+      "Could not export data."
+    );
+
+  }
+
+}
+
+
+
+// =====================================================
+// HTML ESCAPING
+// =====================================================
+
+
+function escapeHtml(value) {
+
+  return String(value || "")
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
+
+
+// =====================================================
+// INITIAL LOAD
+// =====================================================
+
+
+window.onload = () => {
+
+  showPage("formPage");
+
+};
+
+
+</script>
+
+
+</body>
+
+</html>
