@@ -1,0 +1,12 @@
+{
+  "name": "sip-summer-tracker",
+  "version": "1.0.0",
+  "description": "Shared SIP Summer Tracker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
